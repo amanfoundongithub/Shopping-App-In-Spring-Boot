@@ -67,9 +67,7 @@
                 },
             }).then(async (res) => {
                 if (res.ok) {
-                    
-                    const json = await res.json()
-                    alert("Order Placed. Order ID: " + json);
+                    alert("Order Placed")
                     window.location.href = "http://localhost:8080/customer/profile/cart"
                 }
                 else {
