@@ -67,6 +67,8 @@
                 password,
             })
 
+            console.log(body) 
+
              
 
             fetch(url, {
@@ -76,6 +78,7 @@
                     'Content-Type': 'application/json'
                 },
             }).then(async (res) => {
+                alert(res) 
                 if(res.ok){
                     window.location.href = res.url 
                 }

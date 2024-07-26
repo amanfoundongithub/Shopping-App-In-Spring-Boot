@@ -139,8 +139,8 @@
                             <ul class="dropdown-menu">
 
                                 <li><a class="dropdown-item" th:if="${loginID}!= ''"
-                                        href="http://localhost:8080/customer/home">My Home</a></li>
-                                <li><a class="dropdown-item" th:if="${loginID}!= ''" href="#">My Orders</a></li>
+                                        href="http://localhost:8080/customer/profile/home">My Home</a></li>
+                                <li><a class="dropdown-item" th:if="${loginID}!= ''" href="http://localhost:8080/customer/profile/order">My Orders</a></li>
                                 <li>
                                     <hr th:if="${loginID}!= ''" class="dropdown-divider">
                                 </li>

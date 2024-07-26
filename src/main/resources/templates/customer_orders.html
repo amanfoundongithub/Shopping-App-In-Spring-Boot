@@ -107,6 +107,30 @@
                 })
         }
 
+        function changeToDate(obj){
+            const dat = Number.parseInt(obj.date) 
+            const month = Number.parseInt(obj.month) 
+            const year = Number.parseInt(obj.year)
+
+            let date = "";
+
+        if(dat < 10){
+            date = "0" + date;
+        }
+        
+        date = date + dat;
+        if(month< 10){
+            date = date + "-0" + month;
+        }
+        else{
+            date = date + "-" + month;
+        }
+
+        date = date + "-" + year;
+
+        return date;
+        }
+
 
     </script>
     <div class="container-fluid">
@@ -139,7 +163,7 @@
                             <ul class="dropdown-menu">
 
                                 <li><a class="dropdown-item" th:if="${loginID}!= ''"
-                                        href="http://localhost:8080/customer/home">My Home</a></li>
+                                        href="http://localhost:8080/customer/profile/home">My Home</a></li>
                                 <li><a class="dropdown-item" th:if="${loginID}!= ''" href="#">My Orders</a></li>
                                 <li>
                                     <hr th:if="${loginID}!= ''" class="dropdown-divider">
@@ -149,7 +173,7 @@
 
                             </ul>
                         </li>
-                        
+
                     </ul>
                     <div class="d-flex" role="">
 
@@ -190,141 +214,59 @@
             <div class="col-2"></div>
         </div>
         <div class="row">
-            <div class="col-2"></div>
+            <!-- <div class="col-2"></div>
             <div class="col-8">
                 <h3>Pending Orders:</h3>
-            </div>
-            
+            </div> -->
+
         </div>
         <div class="row">
             <div class="col-2"></div>
             <div class="col-8">
-                <h3>Completed Orders:</h3>
+                <h3>Orders:</h3>
                 <div class="accordion" id="completedOrders">
                     <div class="accordion-item" th:each="order : ${orders}">
-                      <h2 class="accordion-header" >
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:data-bs-target="'#' + ${order.id}" aria-expanded="true" th:aria-controls="${order.id}">
-                          <span th:text="'Order #' + ${order.id}">Order#mkjnf</span>
-                        </button>
-                      </h2>
-                      <div th:id="${order.id}" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <h2 th:text="${order.item.itemName}">JBL</h2>
-                              <p><strong>Quantity: </strong> <span th:text="${order.item.quantity}">23</span></p>
-                              <p><strong>Total Bill: </strong> <span th:text="${order.item.quantity} * ${order.item.price}">2333</span></p>
-                              <p>
-                                <strong>Deliver To:
-                                </strong>
-                              </p>
-                              <p  th:text="${order.deliveryLocation.street + ', ' + order.deliveryLocation.city + ', ' + order.deliveryLocation.state + ' - ' + order.deliveryLocation.pinCode}">
-                                ifjufer
-                              </p>
-                                </div>
-                                <div class="col-6">
-                                    <p><strong>STATUS: </strong> <span th:text="${order.orderStatus}">23</span></p>
-                                </div>
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="accordion-item">
-                      <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                          Accordion Item #2
-                        </button>
-                      </h2>
-                      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
-                        <div class="accordion-body">
-                        
-                          
-                            
-                        </div>
-                      </div>
-                    </div>
-                    <div class="accordion-item">
-                      <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                          Accordion Item #3
-                        </button>
-                      </h2>
-                      <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
-                        <div class="accordion-body">
-                          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-                        </div>
-                      </div>
-                    </div>
-                    <div class="accordion-item">
                         <h2 class="accordion-header">
-                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                            Accordion Item #4
-                          </button>
+
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                th:data-bs-target="'#' + ${order.id}" aria-expanded="true"
+                                th:aria-controls="${order.id}">
+                                <span th:text="'Order #' + ${order.id} + ' '">Order#mkjnf</span>
+                                <span>&nbsp;&nbsp;(</span>
+                                <span class="align-text-right" 
+                                th:text="${order.orderDate}"></span>
+                                <span>)</span>
+                            </button>
                         </h2>
-                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
-                          <div class="accordion-body">
-                            <strong>This is the kjdhei item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-                          </div>
-                        </div>
-                      </div>
-                  </div>
-            </div>
-            
-        </div>
-        <div class="row">
-            <div class="col-2"></div>
-            <div class="col-8 d-flex flex-wrap gap-3">
-                <div class="card" style="width: 18rem;" th:each="cartItem : ${cart}">
-
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${cartItem.itemName}">Item title</h5>
-                        <div class="card-text">
-                            <p>Price: <strong th:text="${cartItem.price}">200.0</strong></p>
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="form-floating mb-3">
-                                        <select class="form-select" aria-label="select" th:id="${cartItem.itemCode}">
-                                            <option th:each="i : ${#numbers.sequence(cartItem.quantity, 1)}"
-                                                th:text="${i}" th:value="${i}" th:selected="${i} == cartItem.quantity">
-                                            </option>
-
-                                        </select>
-                                        <label th:for="${cartItem.itemCode}">Quantity</label>
+                        <div th:id="${order.id}" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h2 th:text="${order.item.itemName}">JBL</h2>
+                                        <p><strong>Quantity: </strong> <span th:text="${order.item.quantity}">23</span>
+                                        </p>
+                                        <p><strong>Total Bill: </strong> <span
+                                                th:text="${order.item.quantity} * ${order.item.price}">2333</span></p>
+                                        <p>
+                                            <strong>Deliver To:
+                                            </strong>
+                                        </p>
+                                        <p
+                                            th:text="${order.deliveryLocation.street + ', ' + order.deliveryLocation.city + ', ' + order.deliveryLocation.state + ' - ' + order.deliveryLocation.pinCode}">
+                                            ifjufer
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>STATUS: </strong> <span th:text="${order.orderStatus}">23</span></p>
+                                        <p><strong>Sold By: </strong><span th:text="${order.item.sellerName}">ijfeuri</span></p>
+                                       
                                     </div>
                                 </div>
-                                <div class="col-4 mt-4">
-                                    <button class="btn btn-outline-primary"
-                                        th:attr="onclick=|updateCart('${cartItem.itemCode}', ${cartItem.price})|">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                </div>
-
-
                             </div>
-                            <div class="row">
-                                <div class="col-8 d-flex justify-content-center">
-                                    <a class="btn btn-outline-success"
-                                        th:href="'http://localhost:8080/order/confirm/' + ${cartItem.itemCode}">
-                                        Place Order
-                                    </a>
-                                </div>
-                                <div class="col-4">
-                                    <div class="btn btn-outline-danger"
-                                        th:attr="onclick=|deleteCart('${cartItem.itemCode}')|">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </div>
-                                </div>
-
-                            </div>
-
                         </div>
-
-
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
     </div>

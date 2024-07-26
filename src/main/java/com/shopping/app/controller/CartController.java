@@ -3,6 +3,7 @@ package com.shopping.app.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.shopping.app.exception.CreateException;
 import com.shopping.app.exception.DeleteException;
@@ -13,6 +14,7 @@ import com.shopping.app.model.Cart;
 import com.shopping.app.repository.CartRepository;
 import com.shopping.app.utils.model.CartItem;
 
+@Component
 public class CartController implements ControllerInterface<Cart>{
 
     @Autowired
@@ -150,5 +152,5 @@ public class CartController implements ControllerInterface<Cart>{
             throw new CreateException(e);
         }
     }
-    
+
 }

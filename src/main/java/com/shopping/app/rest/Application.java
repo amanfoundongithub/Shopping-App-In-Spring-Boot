@@ -50,7 +50,9 @@ public class Application {
     @Autowired
     private CartController cartController;
 
-    private String loginID = "";
+    private String customerID = "";
+
+    private String retailorID = "";
 
     private Customer customer;
 
@@ -74,12 +76,23 @@ public class Application {
             String id = retailorController.verifyRetailor(retailorLoginRequest);
 
             if (id.length() > 0) {
-                loginID = id;
+                retailorID = id;
+           
                 return "redirect:/retailor/home";
             } else {
                 return "redirect:/retailor/login";
             }
         } catch (Exception e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    @PostMapping("/retailor/logout")
+    public String retsilrlOGOUT(Model model) throws ApplicationException {
+        try {
+            retailorID = "";
+            return "redirect:/retailor/login";
+        } catch(Exception e) {
             throw new ApplicationException(e);
         }
     }
@@ -107,9 +120,9 @@ public class Application {
     @PostMapping("/customer/login")
     public String getCustomerlogin(@RequestBody LoginRequest loginRequest, Model model) throws ApplicationException {
         try {
-            // System.out.println(loginRequest.email + " " + loginRequest.password);
+            
             if(customerController.logIn(loginRequest.email, loginRequest.password)){
-                loginID = customerController.getCustomerByEmail(loginRequest.email).getId();
+                customerID = customerController.getCustomerByEmail(loginRequest.email).getId();
                 customer = customerController.getCustomerByEmail(loginRequest.email);
                 return "redirect:/home";
             }
@@ -136,7 +149,7 @@ public class Application {
     @PostMapping("/customer/logout")
     public String CusomterlOGOUT(Model model) throws ApplicationException {
         try {
-            loginID = "";
+            customerID = "";
             return "redirect:/customer/login";
         } catch(Exception e) {
             throw new ApplicationException(e);
@@ -147,7 +160,7 @@ public class Application {
     public ResponseEntity<String> customerUpdate(@RequestBody Customer customer) throws CreateException {
         try {
             customerController.updateAccount(customer);
-            this.customer = customerController.getCustomerByID(loginID);
+            this.customer = customerController.getCustomerByID(customerID);
             return ResponseEntity.ok().build();
         } catch(Exception e) {
             throw new CreateException(e);
@@ -157,11 +170,11 @@ public class Application {
     @PostMapping("/customer/update/address")
     public ResponseEntity<String> customerAddressUpdate(@RequestBody Location location) throws CreateException {
         try {
-            if(loginID.length() == 0){
+            if(customerID.length() == 0){
                 return ResponseEntity.badRequest().build();
             }
-            customerController.updateAddress(loginID, location);
-            this.customer = customerController.getCustomerByID(loginID);
+            customerController.updateAddress(customerID, location);
+            this.customer = customerController.getCustomerByID(customerID);
             return ResponseEntity.ok().build();
         } catch(Exception e) {
             throw new CreateException(e);
@@ -186,33 +199,33 @@ public class Application {
         }
     }
 
-    @GetMapping("/customer/home")
+    @GetMapping("/customer/profile/home")
     public String getHomeCustomer(Model model) throws ApplicationException {
         try {
-            if(loginID.equals("")){
+            if(customerID.equals("")){
                 return "customer_login";
             }
             model.addAttribute("customer", customer);
             model.addAttribute("age", customer.getAge());
             model.addAttribute("membersince", customer.getDateOfJoining().toString());
             model.addAttribute("reversedoj", customer.getDateOfBirth().toReverseString());
-            model.addAttribute("loginID", loginID);
+            model.addAttribute("loginID", customerID);
             return "customer_home";
         } catch(Exception e) {
             throw new ApplicationException(e);
         }
     }
 
-    @GetMapping("/customer/mycart")
+    @GetMapping("/customer/profile/cart")
     public String getCart(Model model) throws ApplicationException {
         try {
-            if(loginID.equals("")){
+            if(customerID.equals("")){
                 return "customer_login";
             }
             else{
                 model.addAttribute("customer", customer);
-                model.addAttribute("loginID", loginID);
-                model.addAttribute("cart", cartController.getCart(loginID).getCart());
+                model.addAttribute("loginID", customerID);
+                model.addAttribute("cart", cartController.getCart(customerID).getCart().reversed());
                 return "customer_cart";
             }
         } catch(Exception e) {
@@ -220,16 +233,16 @@ public class Application {
         }
     }
 
-    @GetMapping("/customer/myorder")
+    @GetMapping("/customer/profile/order")
     public String getOrder(Model model) throws ApplicationException {
         try {
-            if(loginID.equals("")){
+            if(customerID.equals("")){
                 return "customer_login";
             }
             else{
                 model.addAttribute("customer", customer);
-                model.addAttribute("loginID", loginID);
-                model.addAttribute("orders", orderController.getAllOrdersByCustomerID(loginID));
+                model.addAttribute("loginID", customerID);
+                model.addAttribute("orders", orderController.getAllOrdersByCustomerID(customerID).reversed());
                 return "customer_orders";
             }
         } catch(Exception e) {
@@ -264,12 +277,12 @@ public class Application {
     @GetMapping("/retailor/home")
     public String getHomePage(Model model) throws ApplicationException {
         try {
-            if (loginID.length() == 0) {
+            if (retailorID.length() == 0) {
                 return "retailor_signin";
             }
-            Retailor retailor = retailorController.getRetailor(loginID);
-            List<Item> listOfItems = itemController.getAllItemsBySellerId(loginID);
-            List<Order> listofOrders = orderController.getAllOrdersByCustomerID(loginID);
+            Retailor retailor = retailorController.getRetailor(retailorID);
+            List<Item> listOfItems = itemController.getAllItemsBySellerId(retailorID);
+            List<Order> listofOrders = orderController.getAllOrdersBySellerID(retailorID);
 
             if (retailor == null) {
                 return "retailor_signin";
@@ -307,8 +320,8 @@ public class Application {
                 list = itemController.searchItems(query, itemType);
                 model.addAttribute("selectedType", itemType);
             }
-            model.addAttribute("loginID", loginID);
-            if(loginID.length() > 0){
+            model.addAttribute("loginID", customerID);
+            if(customerID.length() > 0){
                 model.addAttribute("customer", customer);
             }
             
@@ -324,8 +337,8 @@ public class Application {
     @GetMapping("/home")
     public String getIndexPage(Model model) throws ApplicationException {
         try {
-            model.addAttribute("loginID", loginID);
-            if(loginID.length() > 0){
+            model.addAttribute("loginID", customerID);
+            if(customerID.length() > 0){
                 model.addAttribute("customer", customer);
             }
             model.addAttribute("query", "");
@@ -343,10 +356,10 @@ public class Application {
             @PathVariable("id") String id,
             Model model) throws ApplicationException {
         try {
-            model.addAttribute("loginID", loginID);
+            model.addAttribute("loginID", customerID);
             Item item = itemController.searchByID(id);
             model.addAttribute("item", item);
-            if(loginID.length() > 0){
+            if(customerID.length() > 0){
                 model.addAttribute("customer", customer);
             }
             return "item_view";
@@ -360,7 +373,7 @@ public class Application {
         @PathVariable("id") String id,
         Model model) throws ApplicationException {
             try {
-                Cart cart = cartController.getCart(loginID);
+                Cart cart = cartController.getCart(customerID);
 
                 CartItem cartItem = cart.findInCart(id).get();
 
@@ -369,7 +382,7 @@ public class Application {
                 item.setQuantity(cartItem.quantity);
 
                 model.addAttribute("item", item);
-                model.addAttribute("loginID", loginID);
+                model.addAttribute("loginID", customerID);
                 model.addAttribute("customer", customer);
 
                 return "confirm_order";
@@ -386,7 +399,7 @@ public class Application {
     @PostMapping("/cart/additem")
     public ResponseEntity<String> addToCart(@RequestBody CartItem item) throws CreateException {
         try {
-            boolean added =  cartController.addToCart(loginID, item);
+            boolean added =  cartController.addToCart(customerID, item);
             if (added) {
                 return ResponseEntity.ok().build();
             } else {
@@ -400,7 +413,7 @@ public class Application {
     @PostMapping("/cart/updateitem")
     public ResponseEntity<String> updateToCart(@RequestBody CartItem item) throws CreateException {
         try {
-            boolean added = cartController.updateToCart(loginID, item);
+            boolean added = cartController.updateToCart(customerID, item);
             if (added) {
                 return ResponseEntity.ok().build();
             } else {
@@ -414,7 +427,7 @@ public class Application {
     @PostMapping("/cart/deleteitem")
     public ResponseEntity<String> deleteToCart(@RequestBody CartItem item) throws CreateException {
         try {
-            boolean added = cartController.deleteToCart(loginID, item);
+            boolean added = cartController.deleteToCart(customerID, item);
             if (added) {
                 return ResponseEntity.ok().build();
             } else {
@@ -445,7 +458,7 @@ public class Application {
             item.setQuantity(diff); 
             itemController.update(item);
 
-            cartController.deleteToCart(loginID, itemId);
+            cartController.deleteToCart(customerID, itemId);
             return ResponseEntity.ok(orderId);
         } catch(Exception e) {
             throw new CreateException(e);
