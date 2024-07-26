@@ -1,0 +1,257 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script>
+
+        function validEmail(email){
+            return email.includes("@");
+        }
+
+        function validPassword(password){
+            return password.length >= 8;
+        }
+
+        function validEmpty(string){
+            return string.length >= 0;
+        }
+
+        function validateButton(){
+            const inputEmail = document.getElementById("email").value 
+            const inputPassword = document.getElementById("password").value
+
+            if(!validEmail(inputEmail) || 
+            !validPassword(inputPassword)){
+                document.getElementById("submit").disabled = true;
+            }
+            else{
+                document.getElementById("submit").disabled = false;
+            }
+        }
+
+        function handlePassword(event) {
+            const inputEmail = event.target.value;
+            if(validPassword(inputEmail) == false){
+                document.getElementById("password").className = "form-control is-invalid"
+            }
+            else{
+                document.getElementById("password").className = "form-control is-valid" 
+            }
+
+            validateButton()
+        }
+
+        function handleEmail(event) { 
+            const inputEmail = event.target.value;
+            if(validEmail(inputEmail) == false){
+                document.getElementById("email").className = "form-control is-invalid"
+            }
+            else{
+                document.getElementById("email").className = "form-control is-valid" 
+            }
+
+            validateButton()
+        }
+
+        function handleSelect(event){
+            if(validEmpty(event.target.value)){
+                document.getElementById("gender").className = "form-select is-valid"
+            }
+            else{
+                document.getElementById("gender").className = "form-select is-invalid"
+            }
+        }
+
+        function handleDOB(event){
+            let birthDate = new Date(event.target.value);
+            let today = new Date();
+
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            if(age >= 18){
+                document.getElementById("dob").className = "form-control is-valid"
+            }
+            else{
+                document.getElementById("dob").className = "form-control is-invalid"
+            }
+        }
+
+        function handleName(event, id){
+            if(event.target.value.trim().length > 0){
+                document.getElementById(id).className = "form-control is-valid"
+            }
+            else{
+                document.getElementById(id).className = "form-control is-invalid" 
+            }
+        }
+
+
+        function submitForm() {
+            const email = document.getElementById("email").value 
+            const password = document.getElementById("password").value
+            const gender = document.getElementById("gender").value
+
+            const firstName = document.getElementById("firstName").value 
+            const lastName = document.getElementById("lastName").value
+
+            const date = new Date(document.getElementById("dob").value) 
+
+            const todayDate = new Date() 
+
+            
+            const url = "http://localhost:8080/customer/create"
+
+            const body = JSON.stringify({
+                email ,
+                password ,
+                gender,
+                name : {
+                    firstName,
+                    lastName
+                },
+                dateOfBirth : {
+                    date : date.getDate(),
+                    month : date.getMonth() + 1,
+                    year : date.getFullYear()
+                },
+                dateOfJoining : {
+                    date : todayDate.getDate(),
+                    month : todayDate.getMonth() + 1,
+                    year : todayDate.getFullYear()
+                }
+
+            })
+
+            ;
+
+            fetch(url, {
+                method : 'POST',
+                body : body, 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then(async (res) => {
+                if(res.ok){
+                    window.location.href = res.url
+                }
+                else{
+
+                }
+            })
+            .catch((err)=>{
+                console.log(err) 
+            })
+        }
+    </script>
+    <div class="d-flex flex-column justify-content-center container-fluid col">
+        
+        <div class="row">
+            <div class="col"></div>
+            <div class="col text-center"><h2>Sign Up Page</h2></div>
+            <div class="col"></div>
+        </div>
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="firstName" placeholder="" onchange="handleName(event, 'firstName')">
+                            <label for="firstName">First Name</label>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                First Name cannot be empty!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="lastName" placeholder="" onchange="handleName(event, 'lastName')">
+                            <label for="lastName">Last Name</label>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Last Name cannot be empty!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="dob" onchange="handleDOB(event)">
+                        <label for="dob">Date Of Birth</label>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            You must be at least 18 years old! 
+                        </div>
+                    </div>
+                    
+                </div>
+                <div>
+                    <select class="form-select" aria-label="select" id = "gender" onchange="handleSelect(event)">
+                        <option value = "" selected>Select your gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Select a gender! 
+                    </div>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="email" placeholder = "" onchange = "handleEmail(event)">
+                    <label for="email">Email</label>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Enter a valid email! 
+                    </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" placeholder = "" onchange = "handlePassword(event)">
+                    <label for="password">Set Password</label>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Enter a valid password! 
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <button id = "submit" class="btn btn-outline-warning" disabled = "true" onclick="submitForm()">
+                        Submit
+                    </button>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        </form>
+    </div>
+</body>
+
+</html>

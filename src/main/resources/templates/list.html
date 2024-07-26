@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:hello="http://hello">
+
+  <head>
+    <title>Say Hello! - Extending Thymeleaf in 5 minutes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
+  <body>
+    <h2>List</h2>
+    <ul th:each = "student : ${list}">
+        <li th:text = "${student}"></li>
+    </ul>
+
+  </body>
+</html>

@@ -1,0 +1,333 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>View Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/03e96c11a3.js" crossorigin="anonymous"></script>
+    <script th:inline="javascript">
+
+        function searchItem() {
+            const query = document.getElementById("query").value
+
+            let url = "http://localhost:8080/home/search?query="
+
+            if (query.length > 0) {
+                url += query;
+            }
+
+            window.location.href = url
+        }
+
+        function logOut() {
+            let url = "http://localhost:8080/customer/logout"
+            let body = ""
+
+            fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then((res) => {
+                window.location.href = res.url
+            })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+
+        function logIn() {
+            let url = 'http://localhost:8080/customer/login'
+            window.location.href = url
+        }
+
+        function updateCart(itemCode, price) {
+
+            const customerId = document.getElementById("loginID").textContent
+
+            const quantity = document.getElementById(itemCode).value
+
+            let url = "http://localhost:8080/cart/updateitem"
+            let body = JSON.stringify({
+                itemCode,
+                price,
+                quantity
+            })
+
+            console.log(body)
+
+            fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then((res) => {
+                alert('Added')
+                console.log(res)
+            })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+
+        function deleteCart(itemCode) {
+
+            const customerId = document.getElementById("loginID").textContent
+
+            let url = "http://localhost:8080/cart/deleteitem"
+            let body = JSON.stringify({
+                itemCode,
+            })
+
+            console.log(body)
+
+            fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then((res) => {
+                alert('Deleted')
+                console.log(res)
+                window.location.reload()
+            })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+
+
+    </script>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">My Orders</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="http://localhost:8080/home">
+                                Home
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false" th:if="${loginID}!= ''"
+                                th:text="'Welcome, ' + ${customer.name.firstName} + ' ' + ${customer.name.lastName}">
+
+                            </a>
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false" th:if="${loginID}== ''" th:text="'Welcome, Log In'">
+
+                            </a>
+                            <ul class="dropdown-menu">
+
+                                <li><a class="dropdown-item" th:if="${loginID}!= ''"
+                                        href="http://localhost:8080/customer/home">My Home</a></li>
+                                <li><a class="dropdown-item" th:if="${loginID}!= ''" href="#">My Orders</a></li>
+                                <li>
+                                    <hr th:if="${loginID}!= ''" class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" th:if="${loginID}!= ''" onclick="logOut()">Logout</a></li>
+                                <li><a class="dropdown-item" th:if="${loginID} == ''" onclick="logIn()">Log In</a></li>
+
+                            </ul>
+                        </li>
+                        
+                    </ul>
+                    <div class="d-flex" role="">
+
+                        <input class="form-control me-2" type="text" placeholder="Search" aria-label="Search"
+                            id="query">
+                        <button class="btn btn-outline-success" onclick="searchItem()">Search</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="row">
+            <div class="col"></div>
+            <div class="col text-center">
+                <p class="display-6"></p>
+            </div>
+            <div class="col"></div>
+        </div>
+        <div class="row">
+            <div class="col"></div>
+            <div class="col text-center">
+
+            </div>
+            <div class="col"></div>
+        </div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4">
+                <p th:text="${loginID}" hidden id="loginID"></p>
+            </div>
+            <div class="col-4"></div>
+        </div>
+        <div id="items" class="row">
+            <div class="col-2"></div>
+
+            <div class="col-8">
+                <h4 class="display-6 text-center" id="name">My Orders</h4>
+            </div>
+            <div class="col-2"></div>
+        </div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                <h3>Pending Orders:</h3>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                <h3>Completed Orders:</h3>
+                <div class="accordion" id="completedOrders">
+                    <div class="accordion-item" th:each="order : ${orders}">
+                      <h2 class="accordion-header" >
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:data-bs-target="'#' + ${order.id}" aria-expanded="true" th:aria-controls="${order.id}">
+                          <span th:text="'Order #' + ${order.id}">Order#mkjnf</span>
+                        </button>
+                      </h2>
+                      <div th:id="${order.id}" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h2 th:text="${order.item.itemName}">JBL</h2>
+                              <p><strong>Quantity: </strong> <span th:text="${order.item.quantity}">23</span></p>
+                              <p><strong>Total Bill: </strong> <span th:text="${order.item.quantity} * ${order.item.price}">2333</span></p>
+                              <p>
+                                <strong>Deliver To:
+                                </strong>
+                              </p>
+                              <p  th:text="${order.deliveryLocation.street + ', ' + order.deliveryLocation.city + ', ' + order.deliveryLocation.state + ' - ' + order.deliveryLocation.pinCode}">
+                                ifjufer
+                              </p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>STATUS: </strong> <span th:text="${order.orderStatus}">23</span></p>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                          Accordion Item #2
+                        </button>
+                      </h2>
+                      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
+                        <div class="accordion-body">
+                        
+                          
+                            
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                          Accordion Item #3
+                        </button>
+                      </h2>
+                      <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
+                        <div class="accordion-body">
+                          <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                            Accordion Item #4
+                          </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#completedOrders">
+                          <div class="accordion-body">
+                            <strong>This is the kjdhei item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8 d-flex flex-wrap gap-3">
+                <div class="card" style="width: 18rem;" th:each="cartItem : ${cart}">
+
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${cartItem.itemName}">Item title</h5>
+                        <div class="card-text">
+                            <p>Price: <strong th:text="${cartItem.price}">200.0</strong></p>
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" aria-label="select" th:id="${cartItem.itemCode}">
+                                            <option th:each="i : ${#numbers.sequence(cartItem.quantity, 1)}"
+                                                th:text="${i}" th:value="${i}" th:selected="${i} == cartItem.quantity">
+                                            </option>
+
+                                        </select>
+                                        <label th:for="${cartItem.itemCode}">Quantity</label>
+                                    </div>
+                                </div>
+                                <div class="col-4 mt-4">
+                                    <button class="btn btn-outline-primary"
+                                        th:attr="onclick=|updateCart('${cartItem.itemCode}', ${cartItem.price})|">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
+
+
+                            </div>
+                            <div class="row">
+                                <div class="col-8 d-flex justify-content-center">
+                                    <a class="btn btn-outline-success"
+                                        th:href="'http://localhost:8080/order/confirm/' + ${cartItem.itemCode}">
+                                        Place Order
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <div class="btn btn-outline-danger"
+                                        th:attr="onclick=|deleteCart('${cartItem.itemCode}')|">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>
