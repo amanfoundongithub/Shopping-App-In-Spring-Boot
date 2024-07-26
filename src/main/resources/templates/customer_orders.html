@@ -258,6 +258,7 @@
                                     </div>
                                     <div class="col-6">
                                         <p><strong>STATUS: </strong> <span th:text="${order.orderStatus}">23</span></p>
+                                        <p th:if="${order.orderStatus == delivered}"><strong>DELIVERED ON: </strong> <span th:text="${order.deliveryDate}">23</span></p>
                                         <p><strong>Sold By: </strong><span th:text="${order.item.sellerName}">ijfeuri</span></p>
                                        
                                     </div>

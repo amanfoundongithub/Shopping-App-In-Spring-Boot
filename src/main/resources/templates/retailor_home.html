@@ -183,6 +183,8 @@
                                 th:text="'Welcome back, ' + ${retailor.name}">
                                 
                             </a>
+                            <span
+                            th:text="'Member since: ' + ${retailor.joiningDate.date + '-' + retailor.joiningDate.month + '-' + retailor.joiningDate.year}"></span>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" onclick="logOut()">Log Out</a></li>
                                 
@@ -212,9 +214,7 @@
             <div class="col-4">
                 <p th:text="${retailor.id}" hidden id="id"></p>
                 <p th:text="${retailor.name}" hidden id="retailname"></p>
-                <h6
-                    th:text="'Member since: ' + ${retailor.joiningDate.date + '-' + retailor.joiningDate.month + '-' + retailor.joiningDate.year}">
-                    Member since : 26-01-2005</h6>
+                
             </div>
             <div class="col-4"></div>
         </div>
@@ -324,12 +324,12 @@
             <div class="accordion" id="accordionExample">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                             My Items
                         </button>
                     </h2>
-                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
 
                             <div class="d-flex gap-3">

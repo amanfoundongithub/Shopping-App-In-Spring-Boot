@@ -12,6 +12,10 @@ import com.shopping.app.exception.SearchException;
 import com.shopping.app.exception.UpdateException;
 import com.shopping.app.model.Order;
 import com.shopping.app.repository.OrderRepository;
+import com.shopping.app.utils.OrderStatus;
+import com.shopping.app.utils.model.Date;
+
+import java.time.LocalDate;
 
 @Component
 public class OrderController implements ControllerInterface<Order>{
@@ -63,6 +67,11 @@ public class OrderController implements ControllerInterface<Order>{
             }
 
             if(object.getOrderStatus() != null){
+                if(object.getOrderStatus() == OrderStatus.DELIVERED){
+                    LocalDate localDate = LocalDate.now();
+                    Date date = new Date(localDate.getDayOfMonth(), localDate.getMonthValue(), localDate.getYear());
+                    target.setDeliveryDate(date);
+                }
                 target.setOrderStatus(object.getOrderStatus());
             }
 

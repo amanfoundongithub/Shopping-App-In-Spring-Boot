@@ -15,7 +15,6 @@ import com.shopping.app.controller.CartController;
 import com.shopping.app.controller.CustomerController;
 import com.shopping.app.controller.ItemController;
 import com.shopping.app.controller.OrderController;
-import com.shopping.app.controller.RetailorController;
 import com.shopping.app.exception.ApplicationException;
 import com.shopping.app.exception.CreateException;
 import com.shopping.app.model.Cart;
@@ -34,9 +33,6 @@ import java.util.List;
 
 @Controller
 public class Application {
-
-    @Autowired
-    private RetailorController retailorController;
 
     @Autowired
     private ItemController itemController;
@@ -59,7 +55,7 @@ public class Application {
     @PostMapping("/retailor/create")
     public String getRetailorCreate(@RequestBody Retailor retailor, Model model) throws ApplicationException {
         try {
-            if (retailorController.createRetailor(retailor).length() > 0) {
+            if (customerController.createRetailor(retailor).length() > 0) {
                 return "redirect:/retailor/login";
             } else {
                 return "redirect:/retailor/login";
@@ -73,7 +69,7 @@ public class Application {
     public String getRetailorLogIn(@RequestBody RetailorLoginRequest retailorLoginRequest) throws ApplicationException {
         try {
 
-            String id = retailorController.verifyRetailor(retailorLoginRequest);
+            String id = customerController.verifyRetailor(retailorLoginRequest);
 
             if (id.length() > 0) {
                 retailorID = id;
@@ -137,9 +133,8 @@ public class Application {
     @PostMapping("/customer/create")
     public String createAccount(@RequestBody Customer customer, Model model) throws ApplicationException {
         try {
-            
-            customerController.createAccount(customer);
-
+            String customerId = customerController.createAccount(customer);
+            cartController.create(customerId);
             return "redirect:/customer/login";
         } catch(Exception e) {
             throw new ApplicationException(e);
@@ -239,7 +234,9 @@ public class Application {
             if(customerID.equals("")){
                 return "customer_login";
             }
+
             else{
+                model.addAttribute("delivered", OrderStatus.DELIVERED);
                 model.addAttribute("customer", customer);
                 model.addAttribute("loginID", customerID);
                 model.addAttribute("orders", orderController.getAllOrdersByCustomerID(customerID).reversed());
@@ -280,14 +277,15 @@ public class Application {
             if (retailorID.length() == 0) {
                 return "retailor_signin";
             }
-            Retailor retailor = retailorController.getRetailor(retailorID);
-            List<Item> listOfItems = itemController.getAllItemsBySellerId(retailorID);
-            List<Order> listofOrders = orderController.getAllOrdersBySellerID(retailorID);
+            Retailor retailor = customerController.getRetailor(retailorID);
+            List<Item> listOfItems = itemController.getAllItemsBySellerId(retailorID).reversed();
+            List<Order> listofOrders = orderController.getAllOrdersBySellerID(retailorID).reversed();
 
             if (retailor == null) {
                 return "retailor_signin";
             } else {
                 model.addAttribute("statuses", OrderStatus.values());
+                
                 model.addAttribute("orders", listofOrders);
                 model.addAttribute("retailor", retailor);
                 model.addAttribute("items", listOfItems);

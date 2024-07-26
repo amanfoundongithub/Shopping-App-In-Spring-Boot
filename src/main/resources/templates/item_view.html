@@ -170,7 +170,7 @@
 
             <div class="col-8">
                 <h4 th:text="${item.itemName}" class="display-6 text-center" id = "name">JBL HEADPHONES</h4>
-                <p>Type: <mark>ELECTRONIC</mark></p>
+                <p>Type: <mark th:text="${item.itemType}"></mark></p>
                 <p th:text="${item.description}">
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero dignissimos doloribus doloremque, rerum excepturi sunt vero quo aut quia autem. Corrupti ipsa, iusto possimus quae doloremque reprehenderit perferendis itaque magnam sit aspernatur error minus quam quibusdam obcaecati recusandae placeat dicta quidem voluptas libero inventore ex at. Esse voluptatum quibusdam libero!
                 </p>
