@@ -102,6 +102,9 @@ public class Customer {
     }
 
     public int getAge() {
+        if(dateOfBirth == null){
+            return -1;
+        }
         LocalDate birthDate = LocalDate.of(dateOfBirth.getYear(), dateOfBirth.getMonth(), dateOfBirth.getDate());
 
         LocalDate currentDate = LocalDate.now();
