@@ -11,6 +11,7 @@ import com.shopping.app.repository.CustomerRepository;
 import com.shopping.app.repository.RetailorRepository;
 import com.shopping.app.utils.model.Location;
 import com.shopping.app.utils.request.RetailorLoginRequest;
+import com.shopping.app.utils.service.PasswordService;
 
 
 @Component
@@ -22,19 +23,24 @@ public class CustomerController {
     @Autowired
     private RetailorRepository retailorRepository;
 
-  
+    
+    private PasswordService passwordService = new PasswordService();
 
     public CustomerController(){
 
     }
 
     public boolean logIn(String email, String password) {
-        Customer customer = customerRepository.findCustomerByEmailAndPassword(email, password);
-
-        if(customer != null){
-            return true;
+        // Customer customer = customerRepository.findCustomerByEmailAndPassword(email, password);
+        Customer customer = customerRepository.findByEmail(email).get();
+        if(customer == null){
+            return false;
         }
-        return false;
+
+        if(passwordService.checkPassword(password, customer.getPassword()) == false){
+            return false;
+        }
+        return true;
     }
 
     public Customer getCustomerByEmail(String email){
@@ -47,6 +53,7 @@ public class CustomerController {
 
     public String createAccount(Customer customer) throws CreateException {
         try {
+            customer.setPassword(passwordService.hashPassword(customer.getPassword()));
             String id = customerRepository.save(customer).getId();
             return id;
         } catch(Exception e) {
@@ -92,6 +99,7 @@ public class CustomerController {
 
     public String createRetailor(Retailor retailor) throws CreateException {
         try {
+            retailor.setPassword(passwordService.hashPassword(retailor.getPassword()));
             return retailorRepository.save(retailor).getId();
         } catch(Exception e) {
             throw new CreateException(e);
@@ -104,12 +112,16 @@ public class CustomerController {
             String name = retailorLoginRequest.name;
             String password = retailorLoginRequest.password;
 
-            if(retailorRepository.findRetailorNameAndPass(name, password) != null){
-                return retailorRepository.findRetailorNameAndPass(name, password).getId();
-            }
-            else{
+            Retailor retailor = retailorRepository.findByName(name).get();
+            if(retailor == null){
                 return "";
             }
+
+            if(passwordService.checkPassword(password, retailor.getPassword()) == false){
+                return "";
+            }
+           
+            return retailor.getId();
             
         } catch(Exception e) {
             throw new SearchException(e);

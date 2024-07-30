@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="eng" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payment Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script th:inline="javascript">
+
+        function placeOrder() {
+            const customerId = document.getElementById("customerId").textContent
+
+
+            const street = document.getElementById("street").textContent
+
+            const landmark = document.getElementById("landmark").textContent
+
+            const city = document.getElementById("city").textContent
+            const state = document.getElementById("state").textContent
+            const nation = document.getElementById("nation").textContent
+            const pinCode = document.getElementById("pincode").textContent
+
+            const id = document.getElementById("orderId").textContent
+            const itemName = document.getElementById("name").textContent
+            const price = document.getElementById("price").textContent
+            const quantity = document.getElementById("quantity").textContent
+            const sellerId = document.getElementById("sellerId").textContent
+            const sellerName = document.getElementById("sellerName").textContent
+
+
+            const url = "http://localhost:8080/order/addnew"
+
+            const body = JSON.stringify({
+                customerId,
+                item: {
+                    id,
+                    itemName,
+                    price,
+                    quantity,
+                    sellerId,
+                    sellerName
+                },
+                deliveryLocation: {
+                    pinCode,
+                    street,
+                    landmark,
+                    city,
+                    state,
+                    nation
+                }
+            })
+
+            console.log(body)
+
+            fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            }).then(async (res) => {
+                if (res.ok) {
+                    alert("Order Placed")
+                    window.location.href = "http://localhost:8080/customer/profile/order"
+                }
+                else {
+
+                }
+            })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+
+
+
+        const handleCreditCard = (selectedType) => {
+
+            types = [
+                'creditcard',
+                'debitcard',
+                'upi',
+                'netbanking',
+              //  'payondelivery'
+            ]
+
+
+            for (let type of types) {
+                let classType = "nav-link"
+                if (type == selectedType) {
+                    classType += " active"
+
+                }
+                document.getElementById(type + "_select").className = classType
+            }
+
+            for (let type of types) {
+                let classType = "collapse"
+                if (type == selectedType) {
+                    classType += ".show"
+                }
+                document.getElementById(type + "_body").className = classType
+            }
+
+            document.getElementById("placeholder_body").className = "collapse"
+        }
+
+
+        // UPI
+        function enableVerify(event) {
+
+            if (event.target.value.includes("@")) {
+                document.getElementById("vpa_verify_button").disabled = false
+            }
+            else {
+                document.getElementById("vpa_verify_button").disabled = true
+            }
+
+        }
+
+        function enableEdit() {
+            document.getElementById("description").hidden = true
+            document.getElementById("vpa_pay_button").hidden = true
+
+            document.getElementById("upi_vpa").disabled = false
+            document.getElementById("vpa_verify_button").innerHTML = "Verify VPA"
+            document.getElementById("vpa_verify_button").className = "btn btn-outline-warning"
+            document.getElementById("vpa_verify_button").onclick = () => {
+                handleVPAVerification()
+            }
+
+        }
+
+        function handleVPAVerification() {
+            const vpa = document.getElementById("upi_vpa").value
+
+            const verified = true
+
+            document.getElementById("upi_vpa").disabled = verified
+
+            // Update the button
+            document.getElementById("vpa_verify_button").innerHTML = "Edit VPA"
+            document.getElementById("vpa_verify_button").className = "btn btn-outline-secondary"
+            document.getElementById("vpa_verify_button").onclick = () => {
+                enableEdit()
+            }
+
+            document.getElementById("description").hidden = !verified
+            document.getElementById("vpa_pay_button").hidden = !verified
+            if (verified) {
+
+            }
+            else {
+
+            }
+        }
+
+        function getOrder(requestBody, url) {
+            fetch(url, {
+                method : 'POST',
+                body : requestBody, 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(async (res) => {
+                const json = await res.text()
+
+                if(json == 'success'){
+                    alert("Payment Recieved")
+                    placeOrder() 
+                }
+                else{
+                    alert("Payment Failed")
+                    reInitialize() 
+                }
+
+            })
+            .catch((err) => {
+                console.log(err) 
+            })
+        }
+
+        function handleUPIPayment() {
+            let amount = document.getElementById("bill").textContent
+            initiatePayment()
+
+            const url = "http://localhost:8080/api/pay/upi?amount=" + amount 
+
+            const vpa = document.getElementById("upi_vpa").value
+            const requestBody = JSON.stringify({
+                vpa
+            })
+
+            getOrder(requestBody, url);
+        }
+
+        function handleCreditCardPayment() {
+            let amount = document.getElementById("bill").textContent
+            initiatePayment()
+
+            const url = "http://localhost:8080/api/pay/creditcard?amount=" + amount 
+
+            const cvv = document.getElementById("credit_card_cvv").value 
+            const cardNumber = document.getElementById("credit_card_number").value
+            const cardHolder = document.getElementById("credit_card_name").value
+
+            const expiry = new Date(document.getElementById("credit_card_expiration").value)
+
+            const monthExpire = expiry.getMonth()
+            const yearExpire  = expiry.getFullYear()
+
+            const requestBody = JSON.stringify({
+                cvv,
+                cardHolder,
+                cardNumber,
+                monthExpire,
+                yearExpire
+            })
+
+            getOrder(requestBody, url);
+        }
+
+        function handleDebitCardPayment() {
+            let amount = document.getElementById("bill").textContent
+            initiatePayment()
+
+            const url = "http://localhost:8080/api/pay/debitcard?amount=" + amount 
+
+            const cvv = document.getElementById("debit_card_cvv").value 
+            const cardNumber = document.getElementById("debit_card_number").value
+            const cardHolder = document.getElementById("debit_card_name").value
+
+            const expiry = new Date(document.getElementById("debit_card_expiration").value)
+
+            const monthExpire = expiry.getMonth()
+            const yearExpire  = expiry.getFullYear()
+
+            const requestBody = JSON.stringify({
+                cvv,
+                cardHolder,
+                cardNumber,
+                monthExpire,
+                yearExpire
+            })
+
+            getOrder(requestBody, url);
+        }
+
+        function reInitialize() {
+            document.getElementById("payment_init").className = "collapse.show"
+            document.getElementById("payment_progress").className = "collapse"
+        }
+
+        function initiatePayment() {
+
+            document.getElementById("payment_init").className = "collapse"
+            document.getElementById("payment_progress").className = "collapse.show"
+            // Avoid reload 
+            window.addEventListener('beforeunload', function (e) {
+                // Check if any of the input fields are filled
+                e.preventDefault();
+                e.returnValue = '';
+            });
+
+            let timerIdx = 0
+
+            let colors = ['primary','secondary','danger','success','info','warning',]
+
+            let noOfColors = colors.length
+
+            setInterval(() =>{
+                document.getElementById("spinner_status").className = "spinner-border text-" + colors[timerIdx]
+                timerIdx = (timerIdx + 1) % noOfColors
+            }, 2000)
+        }
+</script>
+
+
+<div class="collapse" id="payment_progress">
+    <div class="container-fluid d-flex justify-content-center align-middle">
+        <div class="spinner-border" role="status" id="spinner_status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p>Please wait while transaction is proceeding</p>
+    </div>
+</div>
+<div class="container-fluid" id="payment_init">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand">Payment Page</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col"></div>
+        <div class="col text-center">
+            <p class="display-6"></p>
+        </div>
+        <div class="col"></div>
+    </div>
+    <div class="row">
+
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="invoiceModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="invoiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="invoiceModalLabel">Order Details</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p hidden id="customerId" th:text="${loginID}"></p>
+                <p hidden id="orderId" th:text="${item.id}"></p>
+                <p hidden id="sellerId" th:text="${item.sellerId}"></p>
+                    <div class="row card-text border border-black rounded">
+                        <table class="table table-striped">
+
+                            <thead>
+                                <h4 class="text-center">Invoice</h4>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Price</th>
+                                    <td>
+                                        <span th:text="${item.price}" id="price">200.4</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Quantity</th>
+                                    <td>
+                                        <span th:text="${item.quantity}" id="quantity">4</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Total Bill:</th>
+                                    <td>
+                                        <span th:text="${item.quantity} * ${item.price}" id="bill"
+                                            style="color:green;">800</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="address" class="mt-3">
+                        <h5>
+                            <span>Ship To:
+                                <span th:text="${customer.name.firstName}">Narendra</span>
+                                <span th:text="${customer.name.lastName}">Modi</span>
+                            </span>
+
+                        </h5>
+                        <p class="card-text">
+                        <p><strong>Shipping Address:</strong></p>
+                        <p style="color: green;">
+                            <span th:text="${customer.address.street}" id="street">200 Good Street</span>,
+                            <span th:text="${customer.address.city}" id="city">New delhi</span>,
+                            <span th:text="${customer.address.state}" id="state">Delhi</span>,
+                            <span th:text="${customer.address.nation}" id="nation">India</span>
+                            -
+                            <span th:text="${customer.address.pinCode}" id="pincode">110001</span>
+                        </p>
+                        <p>
+                            <strong>Landmark:</strong>
+                            <span th:text="${customer.address.landmark}" id="landmark">India</span>
+                        </p>
+                        <p>
+                            <strong>Sold By:</strong>
+                            <span th:text="${item.sellerName}" style="color: green;" id="sellerName">Appario
+                                Retail</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-8 text-center">
+
+            <p hidden id="customerId" th:text="${loginID}"></p>
+            <p hidden id="orderId" th:text="${item.id}"></p>
+            <p hidden id="sellerId" th:text="${item.sellerId}"></p>
+            <p class="display-6 text-center mb-4">Payment Page</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+                Click To See Order Details
+            </button>
+            <ul class="nav nav-tabs" id="tabs">
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Select A Method:</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" id="creditcard_select" style="cursor:pointer;"
+                        onclick="handleCreditCard('creditcard')">Credit Card</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="debitcard_select" style="cursor:pointer;"
+                        onclick="handleCreditCard('debitcard')">Debit Card</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="upi_select" style="cursor:pointer;"
+                        onclick="handleCreditCard('upi')">UPI</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="netbanking_select" style="cursor:pointer;"
+                        onclick="handleCreditCard('netbanking')">Net Banking</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" id="payondelivery_select" style="cursor:pointer;"
+                        onclick="handleCreditCard('payondelivery')">Pay On Delivery</a>
+                </li> -->
+
+            </ul>
+
+            <div class="row border border-primary container-lg" style="height: 50vh;">
+                <div class="col-12">
+
+                    <div class="collapse justify-content-center" id="creditcard_body">
+                        <h2>Credit Card Details</h2>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-floating mb-3">
+
+                                    <input type="number" class="form-control" id="credit_card_number"
+                                        placeholder="name@example.com">
+                                    <label for="credit_card_number">Credit Card Number</label>
+
+                                </div>
+                                <span></span>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="credit_card_name"
+                                        placeholder="Password">
+                                    <label for="credit_card_number">Card Holder Name</label>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="form-floating mb-3">
+
+                                    <input type="month" class="form-control" id="credit_card_expiration"
+                                        placeholder="name@example.com">
+                                    <label for="credit_card_expiration">Card Expiration Date</label>
+
+                                </div>
+                                <span></span>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="credit_card_cvv"
+                                        placeholder="Password">
+                                    <label for="credit_card_cvv">CVV</label>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <button class="btn btn-outline-success" onclick="handleCreditCardPayment()" >Pay</button>
+
+                    </div>
+                    <div class="collapse" id="debitcard_body">
+                        <h2>Debit Card Details</h2>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-floating mb-3">
+
+                                    <input type="number" class="form-control" id="debit_card_number"
+                                        placeholder="name@example.com">
+                                    <label for="debit_card_number">Debit Card Number</label>
+
+                                </div>
+                                <span></span>
+                            </div>
+                            <div class="col">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="debit_card_name"
+                                        placeholder="Password">
+                                    <label for="debit_card_name">Card Holder Name</label>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="form-floating mb-3">
+
+                                    <input type="month" class="form-control" id="debit_card_expiration"
+                                        placeholder="name@example.com">
+                                    <label for="debit_card_expiration">Card Expiration Date</label>
+
+                                </div>
+                                <span></span>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="debit_card_cvv"
+                                        placeholder="Password">
+                                    <label for="debit_card_cvv">CVV</label>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <button class="btn btn-outline-success" onclick="handleDebitCardPayment()">Pay</button>
+                    </div>
+                    <div class="collapse" id="upi_body">
+                        <h2>UPI Payment</h2>
+                        <p>To pay via UPI, enter the Virtual Payment Address:</p>
+                        <div class="row">
+                            <div class="col-9">
+                                <div class="input-group flex-nowrap">
+                                    <span class="input-group-text" id="addon-wrapping">VPA:</span>
+                                    <input type="text" class="form-control" placeholder="Example: 1234567890@paytm"
+                                        aria-label="Username" aria-describedby="addon-wrapping" id="upi_vpa"
+                                        onchange="enableVerify(event)">
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <button class="btn btn-outline-warning" id="vpa_verify_button"
+                                    onclick="handleVPAVerification()" disabled>Veify VPA</button>
+                            </div>
+                        </div>
+
+
+                        <div id="description" hidden>
+                            <p>Go to your UPI app after verification</p>
+                        </div>
+                        <button class="btn btn-outline-success" id="vpa_pay_button" onclick="handleUPIPayment()"
+                            hidden>Pay</button>
+                    </div>
+                    <div class="collapse" id="netbanking_body">
+                        <h2>Net Banking</h2>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="inputGroupSelect01">Select your bank</label>
+                            <select class="form-select" id="inputGroupSelect01">
+                                <option selected>Choose...</option>
+                                <option value="1">SBI</option>
+                                <option value="2">HDFC</option>
+                                <option value="3">Canara Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- <div class="collapse" id="payondelivery_body">
+                        <h2>Pay On Delivery</h2>
+                        <p>Pay at delivery, keep amount ready</p>
+                    </div> -->
+                    <div class="collapse.show" id="placeholder_body">
+                        fieb
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+        </div>
+        <div class="col-2">
+            <p class="display-6">&nbsp;</p>
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-primary">Your Bill</span>
+                <span class="badge bg-primary rounded-pill">2</span>
+            </h4>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-lg">
+                    <div>
+                        <h6 class="my-0" th:text="${item.itemName}" id="name">Surf Excel</h6>
+                        <small class="text-body-secondary">Quantity: 
+                            <span th:text="${item.quantity}" id="quan"> </span>
+                        </small>
+                    </div>
+                    <span class="text-body-secondary" >
+                        <span>₹</span>
+                        <span th:text="${item.price}"></span> 
+                    </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-lg">
+                    <div>
+                        <h6 class="my-0">Delivery Charges</h6>
+
+                    </div>
+                    <span class="text-body-secondary">₹40</span>
+                </li>
+
+                <li class="list-group-item d-flex justify-content-between bg-body-tertiary">
+                    <div class="text-success">
+                        <h6 class="my-0">Promotion Applied</h6>
+                        <small>FREEDELIVERY</small>
+                    </div>
+                    <span class="text-success">-₹40</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total</span>
+                    <span >
+                        <strong>₹</strong>
+                        <strong th:text="${item.quantity} * ${item.price}"></strong>
+                    </span>
+                </li>
+            </ul>
+            <form class="card p-2">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Promo code" fdprocessedid="c23oj">
+                    <button type="submit" class="btn btn-secondary" fdprocessedid="ozcg8">Redeem</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+
+    </div>
+    <div class="row">
+
+    </div>
+
+
+</div>
+</div>
+
+
+</body>
+
+</html>

@@ -14,6 +14,11 @@
         crossorigin="anonymous"></script>
     <script th:inline="javascript">
 
+        function payOrder() {
+            const orderId = document.getElementById("orderId").textContent
+            window.location.href = "http://localhost:8080/order/pay/" + orderId 
+        }
+
         function placeOrder() {
             const customerId = document.getElementById("customerId").textContent
 
@@ -217,8 +222,8 @@
             <div class="col-4"></div>
             <div class="col-2 gap-4 d-flex">
 
-                <button class="btn btn-outline-success" onclick="placeOrder()">
-                    Place My Order
+                <button class="btn btn-outline-success" onclick="payOrder()">
+                    Proceed To Payment
                 </button>
 
             </div>

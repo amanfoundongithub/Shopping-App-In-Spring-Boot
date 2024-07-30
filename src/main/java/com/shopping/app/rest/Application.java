@@ -389,6 +389,30 @@ public class Application {
                 throw new ApplicationException(e);
             }
         }
+    
+    @GetMapping("/order/pay/{id}")
+    public String payOrder(
+            @PathVariable("id") String id,
+            Model model) throws ApplicationException {
+                try {
+                    Cart cart = cartController.getCart(customerID);
+    
+                    CartItem cartItem = cart.findInCart(id).get();
+    
+                    Item item = itemController.searchByID(cartItem.itemCode);
+    
+                    item.setQuantity(cartItem.quantity);
+    
+                    model.addAttribute("item", item);
+                    model.addAttribute("loginID", customerID);
+                    model.addAttribute("customer", customer);
+    
+                    return "customer_payment";
+    
+                } catch(Exception e) {
+                    throw new ApplicationException(e);
+                }
+            }
 
 
     /**
